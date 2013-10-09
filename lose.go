@@ -1,4 +1,4 @@
-// © Steve McCoy under the MIT license.
+// © 2013 Steve McCoy under the MIT license.
 
 package privs
 

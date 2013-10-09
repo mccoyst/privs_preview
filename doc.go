@@ -1,4 +1,4 @@
-// © Steve McCoy under the MIT license.
+// © 2013 Steve McCoy under the MIT license.
 
 /*
 Package privs provides simpler functions to manipulate
