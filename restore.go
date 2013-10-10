@@ -7,7 +7,7 @@ import (
 	"syscall"
 )
 
-// I currently need to track it myself, 
+// I currently need to track it myself,
 // because there is no syscall.Getresuid or syscall.Getsuid,
 // nor do they exist at all on OSX.
 var savedUID int
