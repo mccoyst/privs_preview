@@ -4,12 +4,14 @@ package privs
 
 import (
 	"errors"
+	"runtime"
 	"syscall"
 )
 
 // Lose permanently drops privileges by assigning newID to
 // all of the real, effective, and saved UIDs.
 func LoseTo(newID int) error {
+	runtime.LockOSThread()
 	olde := syscall.Geteuid()
 
 	err := syscall.Setreuid(newID, newID)
