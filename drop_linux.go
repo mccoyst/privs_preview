@@ -2,10 +2,14 @@
 
 package privs
 
+/*
+#include <sys/types.h>
+#include <unistd.h>
+*/
+import "C"
+
 import (
 	"errors"
-	"runtime"
-	"syscall"
 )
 
 // Drop is equivalent to calling DropTo with the current real user ID.
@@ -16,18 +20,17 @@ func Drop() error {
 // DropTo temporarily drops privileges by moving the privileged UID
 // to the saved UID and assigning newID to the effective UID.
 func DropTo(newID int) error {
-	runtime.LockOSThread()
-	olde := syscall.Geteuid()
+	olde := C.seteuid()
 
-	err := syscall.Setreuid(syscall.Getuid(), olde)
+	err := C.setreuid(syscall.Getuid(), olde)
 	if err != nil {
 		return err
 	}
-	err = syscall.Seteuid(newID)
+	err = C.seteuid(newID)
 	if err != nil {
 		return err
 	}
-	if syscall.Geteuid() != newID {
+	if C.geteuid() != newID {
 		return errors.New("failed to set effective UID")
 	}
 	savedUID = olde
