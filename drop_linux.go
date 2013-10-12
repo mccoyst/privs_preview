@@ -3,8 +3,15 @@
 package privs
 
 /*
-#include <sys/types.h>
+#define _GNU_SOURCE
 #include <unistd.h>
+
+int just_seteuid(uid_t e){
+	int err = setresuid(getuid(), e, geteuid());
+	if(err != 0 || geteuid() != e)
+		return -1;
+	return 0;
+}
 */
 import "C"
 
@@ -14,25 +21,15 @@ import (
 
 // Drop is equivalent to calling DropTo with the current real user ID.
 func Drop() error {
-	return DropTo(syscall.Getuid())
+	return DropTo(int(C.getuid()))
 }
 
 // DropTo temporarily drops privileges by moving the privileged UID
 // to the saved UID and assigning newID to the effective UID.
 func DropTo(newID int) error {
-	olde := C.seteuid()
-
-	err := C.setreuid(syscall.Getuid(), olde)
-	if err != nil {
-		return err
-	}
-	err = C.seteuid(newID)
-	if err != nil {
-		return err
-	}
-	if C.geteuid() != newID {
+	e := C.just_seteuid(C.uid_t(newID))
+	if e != 0 {
 		return errors.New("failed to set effective UID")
 	}
-	savedUID = olde
 	return nil
 }

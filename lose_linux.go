@@ -3,8 +3,19 @@
 package privs
 
 /*
-#include <sys/types.h>
+#define _GNU_SOURCE
 #include <unistd.h>
+
+int just_setresuid(uid_t e){
+	uid_t r, newe, s;
+	if(setresuid(e, e, e) != 0)
+		return -1;
+	if(getresuid(&r, &newe, &s) != 0)
+		return -1;
+	if(r != e || newe != e || s != e)
+		return -1;
+	return 0;
+}
 */
 import "C"
 
@@ -15,19 +26,9 @@ import (
 // Lose permanently drops privileges by assigning newID to
 // all of the real, effective, and saved UIDs.
 func LoseTo(newID int) error {
-	olde := C.geteuid()
-
-	err := C.setreuid(newID, newID)
-	if err != nil {
-		return err
+	err := C.just_setresuid(C.uid_t(newID))
+	if err != 0 {
+		return errors.New("failed to set user IDs")
 	}
-	if C.getuid() != newID {
-		return errors.New("failed to set real UID")
-	}
-	if C.geteuid() != newID {
-		return errors.New("failed to set effective UID")
-	}
-	savedUID = olde
-	// hope that the suid, if it exists, was set
 	return nil
 }
